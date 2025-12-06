@@ -13,14 +13,12 @@ using WpfApp4.ViewModels;
 
 namespace WpfApp4
 {
-
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel _context;
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = _context = new();
+            DataContext = new MainWindowViewModel();
         }
     }
 }

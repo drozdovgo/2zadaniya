@@ -1,37 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace WpfApp4.Utils
 {
     public class MyCommand : ICommand
     {
-        private Action<object?> _action;
-        private Predicate<object?>? _canExecute;
+        private readonly Action<object> _execute;
+        private readonly Func<object, bool> _canExecute;
 
-        public event EventHandler? CanExecuteChanged
+        public event EventHandler CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public MyCommand(Action<object?> action, Predicate<object?>? canExecute = null)
+        public MyCommand(Action<object> execute, Func<object, bool> canExecute = null)
         {
-            _action = action;
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
         }
 
-        public bool CanExecute(object? parameter)
+        public bool CanExecute(object parameter)
         {
-            return _canExecute == null || _canExecute(parameter);
+            bool result = _canExecute == null || _canExecute(parameter);
+            System.Diagnostics.Debug.WriteLine($"MyCommand CanExecute вызван: {result}");
+            return result;
         }
 
-        public void Execute(object? parameter)
+        public void Execute(object parameter)
         {
-            _action(parameter);
+            System.Diagnostics.Debug.WriteLine($"MyCommand Execute вызван");
+            _execute(parameter);
         }
     }
 }
