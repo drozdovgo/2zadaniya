@@ -22,4 +22,3 @@ namespace WpfApp4.Domain
         }
     }
 }
-

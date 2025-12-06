@@ -57,7 +57,7 @@ namespace WpfApp4.ViewModels
         }
 
         public void ShowMainView()
-            {
+        {
             if (CurrentUser == null) return;
 
             var mainViewModel = new MainContentViewModel(CurrentUser);
@@ -68,13 +68,13 @@ namespace WpfApp4.ViewModels
         }
 
         private void OnLoginSuccessful(Пользователь user)
-            {
+        {
             CurrentUser = user;
             ShowMainView();
         }
 
         private void OnLogout()
-                    {
+        {
             CurrentUser = null;
             ShowLoginView();
         }

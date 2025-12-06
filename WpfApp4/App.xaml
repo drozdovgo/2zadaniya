@@ -16,7 +16,7 @@
         <Color x:Key="TextPrimary">#2C3E50</Color>
         <Color x:Key="TextSecondary">#7F8C8D</Color>
         <Color x:Key="BorderColor">#E0E0E0</Color>
-         
+
         <!-- Кисти -->
         <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
         <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}"/>
@@ -47,10 +47,10 @@
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="{StaticResource PrimaryDarkBrush}"/>
-                            </Trigger>
+                </Trigger>
                 <Trigger Property="IsPressed" Value="True">
                     <Setter Property="Background" Value="{StaticResource PrimaryDarkBrush}"/>
-                            </Trigger>
+                </Trigger>
             </Style.Triggers>
         </Style>
 
@@ -65,7 +65,7 @@
             <Style.Triggers>
                 <Trigger Property="IsFocused" Value="True">
                     <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                            </Trigger>
+                </Trigger>
             </Style.Triggers>
         </Style>
 
@@ -137,7 +137,7 @@
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Foreground" Value="{StaticResource PrimaryDarkBrush}"/>
-                            </Trigger>
+                </Trigger>
             </Style.Triggers>
         </Style>
     </Application.Resources>
