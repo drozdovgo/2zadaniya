@@ -1,0 +1,194 @@
+﻿<UserControl x:Class="WpfApp4.Views.DoctorSpecializationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+
+    <Grid Background="#F5F7FA">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Шапка -->
+        <Border Grid.Row="0" Background="#3498DB" Padding="20,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding WelcomeMessage}" 
+                           Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+
+                <Button Grid.Column="1" Content="Назад" Command="{Binding BackCommand}"
+                        Background="Transparent" Foreground="White" BorderBrush="White" BorderThickness="1"
+                        Padding="15,8" FontWeight="SemiBold"/>
+            </Grid>
+        </Border>
+
+        <!-- Панель фильтрации -->
+        <Border Grid.Row="1" Background="White" Margin="10" Padding="15" BorderBrush="#E0E0E0" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Специализация:" 
+                           VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+
+                <!-- ComboBox с исправлением: убрано DisplayMemberPath -->
+                <ComboBox Grid.Column="1" 
+                          ItemsSource="{Binding Specializations}"
+                          SelectedItem="{Binding SelectedSpecialization}"
+                          Padding="10" Margin="0,0,10,0"
+                          IsSynchronizedWithCurrentItem="True">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding название}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding описание}" FontSize="11" Foreground="#666666" 
+                                           TextTrimming="CharacterEllipsis" MaxWidth="300"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock Grid.Column="2" Text="Поиск:" 
+                           VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+
+                <TextBox Grid.Column="3" 
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Padding="10">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <ToolTip>
+                                        Поиск по имени, фамилии или специализации
+                                    </ToolTip>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+                <Button Grid.Column="4" Content="Сбросить" Command="{Binding ClearFilterCommand}"
+                        Margin="10,0,0,0" Padding="10,5"/>
+            </Grid>
+        </Border>
+
+        <!-- Статистика -->
+        <Border Grid.Row="2" Background="#E8F4FD" Margin="10,0,10,10" Padding="10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock>
+                    <Run Text="Всего врачей: "/>
+                    <Run Text="{Binding Doctors.Count, Mode=OneWay}" FontWeight="Bold"/>
+                    <Run Text=" | Найдено: "/>
+                    <Run Text="{Binding FilteredDoctors.Count, Mode=OneWay}" FontWeight="Bold"/>
+                    <Run Text=" | Специализация: "/>
+                    <Run Text="{Binding SelectedSpecialization.название, FallbackValue='Все'}" FontWeight="Bold"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Список врачей -->
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Margin="10,0,10,10">
+            <ItemsControl ItemsSource="{Binding FilteredDoctors}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="White" BorderBrush="#E1E5E9" BorderThickness="1" 
+                                Margin="0,0,0,10" Padding="15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Иконка врача -->
+                                <TextBlock Grid.Column="0" Text="👨‍⚕️" FontSize="28" 
+                                           VerticalAlignment="Top" Margin="0,5,15,0"/>
+
+                                <!-- Основная информация -->
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding Пользователь.ПолноеИмя}" 
+                                               FontWeight="Bold" FontSize="16" Foreground="#2C3E50"/>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                        <TextBlock Text="Специализация: " FontSize="12" Foreground="#7F8C8D"/>
+                                        <TextBlock Text="{Binding Специализация.название}" 
+                                                   FontSize="12" FontWeight="SemiBold" Foreground="#3498DB"/>
+                                    </StackPanel>
+
+                                    <TextBlock Text="{Binding Специализация.описание}" 
+                                               FontSize="11" Foreground="#666666" Margin="0,2,0,0"
+                                               TextWrapping="Wrap" MaxWidth="500"/>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <TextBlock Text="Рейтинг: " FontSize="11" Foreground="#7F8C8D"/>
+                                        <TextBlock Text="{Binding рейтинг, StringFormat='0.0'}" 
+                                                   FontSize="11" FontWeight="Bold" Foreground="#F39C12"/>
+                                        <TextBlock Text="★" Foreground="#F39C12" Margin="2,0,0,0"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="Лицензия: " FontSize="11" Foreground="#7F8C8D"/>
+                                        <TextBlock Text="{Binding лицензия}" FontSize="11" FontWeight="SemiBold"/>
+                                    </StackPanel>
+
+                                    <!-- Программа и страховка -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="Программа: " FontSize="11" Foreground="#7F8C8D"/>
+                                        <TextBlock Text="{Binding программа}" FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="#27AE60"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Контактная информация -->
+                                <Border Grid.Column="2" Background="#F8F9FA" Padding="10"
+                                        BorderBrush="#E0E0E0" BorderThickness="1">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                            <TextBlock Text="📞 " FontSize="12"/>
+                                            <TextBlock Text="{Binding Пользователь.телефон}" 
+                                                       FontSize="12" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="✉️ " FontSize="12"/>
+                                            <TextBlock Text="{Binding Пользователь.email}" 
+                                                       FontSize="12" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Статус бар -->
+        <StatusBar Grid.Row="4" Background="#ECF0F1">
+            <StatusBarItem>
+                <TextBlock>
+                    <Run Text="Врачи: "/>
+                    <Run Text="{Binding FilteredDoctors.Count, Mode=OneWay}" FontWeight="Bold"/>
+                    <Run Text=" из "/>
+                    <Run Text="{Binding Doctors.Count, Mode=OneWay}" FontWeight="Bold"/>
+                    <Run Text=" | Специализаций: "/>
+                    <Run Text="{Binding Specializations.Count, Mode=OneWay}" FontWeight="Bold"/>
+                </TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</UserControl>

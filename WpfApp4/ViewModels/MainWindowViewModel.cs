@@ -62,9 +62,21 @@ namespace WpfApp4.ViewModels
 
             var mainViewModel = new MainContentViewModel(CurrentUser);
             mainViewModel.LogoutRequested += OnLogout;
+            mainViewModel.ViewDoctorSpecializationsRequested += ShowDoctorSpecializationView;
 
             CurrentViewModel = mainViewModel;
             WindowTitle = $"Медицинская клиника - {CurrentUser.ПолноеИмя}";
+        }
+
+        public void ShowDoctorSpecializationView()
+        {
+            if (CurrentUser == null) return;
+
+            var doctorSpecializationViewModel = new DoctorSpecializationViewModel(CurrentUser);
+            doctorSpecializationViewModel.BackRequested += ShowMainView;
+
+            CurrentViewModel = doctorSpecializationViewModel;
+            WindowTitle = $"Медицинская клиника - Выбор врача";
         }
 
         private void OnLoginSuccessful(Пользователь user)

@@ -6,32 +6,14 @@
         xmlns:local="clr-namespace:WpfApp4"
         xmlns:views="clr-namespace:WpfApp4.Views"
         xmlns:vm="clr-namespace:WpfApp4.ViewModels"
-        xmlns:conv="clr-namespace:WpfApp4.Converters"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" 
-        Height="700" Width="500" 
+        Height="700" Width="900" 
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
         Background="White">
 
     <Window.Resources>
-        <!-- Конвертеры -->
-        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-
-        <!-- Стиль для кнопок-ссылок -->
-        <Style x:Key="LinkButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="#3498DB"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#2980B9"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
         <!-- DataTemplates для навигации -->
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
             <views:LoginView/>
@@ -43,6 +25,10 @@
 
         <DataTemplate DataType="{x:Type vm:MainContentViewModel}">
             <views:MainContentView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:DoctorSpecializationViewModel}">
+            <views:DoctorSpecializationView/>
         </DataTemplate>
     </Window.Resources>
 

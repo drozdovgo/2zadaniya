@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Linq;
 using WpfApp4.Domain;
 using WpfApp4.Models.Auth;
@@ -85,4 +81,3 @@ namespace WpfApp4.Services
         }
     }
 }
-
