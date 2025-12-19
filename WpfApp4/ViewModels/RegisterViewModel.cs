@@ -105,46 +105,55 @@ namespace WpfApp4.ViewModels
                 IsLoading = true;
                 ErrorMessage = string.Empty;
                 SuccessMessage = string.Empty;
+                System.Diagnostics.Debug.WriteLine($"=== Попытка регистрации ===");
 
                 // Валидация
                 if (RegisterModel.Password != RegisterModel.ConfirmPassword)
                 {
                     ErrorMessage = "Пароли не совпадают";
+                    System.Diagnostics.Debug.WriteLine("❌ Пароли не совпадают");
                     return;
                 }
 
                 if (!_authService.ValidatePassword(RegisterModel.Password))
                 {
                     ErrorMessage = "Пароль должен содержать минимум 6 символов";
+                    System.Diagnostics.Debug.WriteLine("❌ Пароль слишком короткий");
                     return;
                 }
 
                 var result = _authService.Register(RegisterModel);
+                System.Diagnostics.Debug.WriteLine($"Результат регистрации: success={result.success}, message={result.message}");
 
                 if (result.success)
                 {
                     SuccessMessage = result.message;
+                    System.Diagnostics.Debug.WriteLine("✅ Регистрация успешна");
 
                     // Автоматический вход после регистрации
                     var loginResult = _authService.Login(RegisterModel.Email, RegisterModel.Password);
                     if (loginResult.success && loginResult.user != null)
                     {
+                        System.Diagnostics.Debug.WriteLine($"✅ Автоматический вход после регистрации: {loginResult.user.ПолноеИмя}");
                         RegistrationSuccessful?.Invoke(loginResult.user);
                     }
                     else
                     {
-                        // Если автоматический вход не удался, переходим на страницу входа
+                        System.Diagnostics.Debug.WriteLine($"⚠️ Автоматический вход не удался: {loginResult.message}");
                         ShowLoginRequested?.Invoke();
                     }
                 }
                 else
                 {
                     ErrorMessage = result.message;
+                    System.Diagnostics.Debug.WriteLine($"❌ Ошибка регистрации: {result.message}");
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Ошибка при регистрации: {ex.Message}";
+                ErrorMessage = $"Критическая ошибка: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"❌ Критическая ошибка регистрации: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
             }
             finally
             {

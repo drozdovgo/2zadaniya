@@ -11,7 +11,6 @@ namespace WpfApp4.ViewModels
     public class MainContentViewModel : PropertyChangedBase
     {
         private readonly Пользователь _currentUser;
-        private readonly MyDatabaseContext _dbContext;
         private ObservableCollection<Пользователь> _users;
 
         public Пользователь CurrentUser => _currentUser;
@@ -23,23 +22,44 @@ namespace WpfApp4.ViewModels
 
         public string WelcomeMessage => $"Добро пожаловать, {_currentUser.ПолноеИмя} ({_currentUser.роль})";
 
-        // Команды
+        // Команды для всех пользователей
         public MyCommand LogoutCommand { get; }
         public MyCommand RefreshCommand { get; }
+
+        // Команды для разных ролей
         public MyCommand ViewDoctorSpecializationsCommand { get; }
+        public MyCommand ViewPatientAppointmentsCommand { get; }
+        public MyCommand ViewDoctorScheduleCommand { get; }
+        public MyCommand ViewAdminScheduleCommand { get; }
 
         // События
         public event Action? LogoutRequested;
         public event Action? ViewDoctorSpecializationsRequested;
+        public event Action? ViewPatientAppointmentsRequested;
+        public event Action? ViewDoctorScheduleRequested;
+        public event Action? ViewAdminScheduleRequested;
 
         public MainContentViewModel(Пользователь currentUser)
         {
             _currentUser = currentUser;
-            _dbContext = new MyDatabaseContext("Data Source=medicalclinic.db");
 
             LogoutCommand = new MyCommand(_ => LogoutRequested?.Invoke());
             RefreshCommand = new MyCommand(_ => RefreshData());
             ViewDoctorSpecializationsCommand = new MyCommand(_ => ViewDoctorSpecializationsRequested?.Invoke());
+
+            // Инициализация команд в зависимости от роли
+            if (_currentUser.роль == "пациент")
+            {
+                ViewPatientAppointmentsCommand = new MyCommand(_ => ViewPatientAppointmentsRequested?.Invoke());
+            }
+            else if (_currentUser.роль == "врач")
+            {
+                ViewDoctorScheduleCommand = new MyCommand(_ => ViewDoctorScheduleRequested?.Invoke());
+            }
+            else if (_currentUser.роль == "администратор")
+            {
+                ViewAdminScheduleCommand = new MyCommand(_ => ViewAdminScheduleRequested?.Invoke());
+            }
 
             RefreshData();
         }
@@ -48,15 +68,12 @@ namespace WpfApp4.ViewModels
         {
             try
             {
-                var filteredUsers = _dbContext.Пользователь
+                using var context = new MyDatabaseContext("Data Source=medicalclinic.db");
+                var filteredUsers = context.Пользователь
                     .Where(u => u.роль == "врач" || u.роль == "администратор")
                     .ToList();
 
-                // Отладочный вывод
                 System.Diagnostics.Debug.WriteLine($"=== MainContentView ===");
-                System.Diagnostics.Debug.WriteLine($"Всего пользователей в БД: {_dbContext.Пользователь.Count()}");
-                System.Diagnostics.Debug.WriteLine($"Из них врачей: {_dbContext.Пользователь.Count(u => u.роль == "врач")}");
-                System.Diagnostics.Debug.WriteLine($"Из них администраторов: {_dbContext.Пользователь.Count(u => u.роль == "администратор")}");
                 System.Diagnostics.Debug.WriteLine($"Отображается: {filteredUsers.Count}");
 
                 Users = new ObservableCollection<Пользователь>(filteredUsers);

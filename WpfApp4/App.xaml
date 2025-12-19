@@ -5,6 +5,23 @@
              xmlns:conv="clr-namespace:WpfApp4.Converters"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <!-- Конвертеры -->
+        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <conv:BooleanToBrushConverter x:Key="BooleanToBrushConverter"/>
+        <conv:BooleanToTextConverter x:Key="BooleanToTextConverter"/>
+        <conv:RoleToIconConverter x:Key="RoleToIconConverter"/>
+
+        <!-- Конвертеры для статусов -->
+        <conv:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <conv:StatusToIconConverter x:Key="StatusToIconConverter"/>
+        <conv:StatusToCancelVisibilityConverter x:Key="StatusToCancelVisibilityConverter"/>
+
+        <!-- Конвертеры для ролей -->
+        <conv:RoleToPatientVisibilityConverter x:Key="RoleToPatientVisibilityConverter"/>
+        <conv:RoleToDoctorVisibilityConverter x:Key="RoleToDoctorVisibilityConverter"/>
+        <conv:RoleToAdminVisibilityConverter x:Key="RoleToAdminVisibilityConverter"/>
+
         <!-- Современная цветовая палитра -->
         <Color x:Key="PrimaryColor">#3498DB</Color>
         <Color x:Key="PrimaryDarkColor">#2980B9</Color>
@@ -28,10 +45,6 @@
         <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
         <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}"/>
         <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
-
-        <!-- Конвертеры -->
-        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         <!-- Стиль для кнопок -->
         <Style x:Key="ModernButton" TargetType="Button">

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="500" d:DesignWidth="900">
 
     <Grid Background="#F5F7FA">
         <Grid.RowDefinitions>
@@ -31,16 +31,41 @@
             </Grid>
         </Border>
 
-
-        <!-- Панель управления -->
+        <!-- Панель управления с видимостью по ролям -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="16,10" HorizontalAlignment="Center">
-            <Button Content="Обновить данные" Command="{Binding RefreshCommand}" Padding="10,5" Margin="5"/>
+            <Button Content="Обновить данные" Command="{Binding RefreshCommand}" 
+                    Padding="10,5" Margin="5" Background="#7F8C8D" 
+                    Foreground="White" FontWeight="Bold"/>
+
+            <!-- Для всех пользователей -->
             <Button Content="Выбор врача по специализации" 
             Command="{Binding ViewDoctorSpecializationsCommand}" 
-            Padding="10,5" Margin="5" Background="#3498DB" Foreground="White" FontWeight="Bold"/>
+                    Padding="10,5" Margin="5" Background="#3498DB" 
+                    Foreground="White" FontWeight="Bold"/>
+
+            <!-- Для пациентов -->
+            <Button Content="Мои записи" 
+                    Command="{Binding ViewPatientAppointmentsCommand}"
+                    Padding="10,5" Margin="5" Background="#27AE60" 
+                    Foreground="White" FontWeight="Bold"
+                    Visibility="{Binding CurrentUser.роль, Converter={StaticResource RoleToPatientVisibilityConverter}}"/>
+
+            <!-- Для врачей -->
+            <Button Content="Мое расписание" 
+                    Command="{Binding ViewDoctorScheduleCommand}"
+                    Padding="10,5" Margin="5" Background="#9B59B6" 
+                    Foreground="White" FontWeight="Bold"
+                    Visibility="{Binding CurrentUser.роль, Converter={StaticResource RoleToDoctorVisibilityConverter}}"/>
+
+            <!-- Для администраторов -->
+            <Button Content="Управление записями" 
+                    Command="{Binding ViewAdminScheduleCommand}"
+                    Padding="10,5" Margin="5" Background="#E74C3C" 
+                    Foreground="White" FontWeight="Bold"
+                    Visibility="{Binding CurrentUser.роль, Converter={StaticResource RoleToAdminVisibilityConverter}}"/>
         </StackPanel>
 
-        <!-- Список пользователей с ScrollViewer -->
+        <!-- Список пользователей -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding Users}" Margin="16">
                 <ItemsControl.ItemTemplate>
@@ -53,9 +78,8 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Иконка в зависимости от роли -->
                                 <TextBlock Grid.Column="0" 
-                                           Text="👤"
+                                           Text="{Binding роль, Converter={StaticResource RoleToIconConverter}}"
                                            FontSize="24" VerticalAlignment="Top" Margin="0,4,12,0"/>
 
                                 <StackPanel Grid.Column="1">
@@ -71,7 +95,8 @@
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                         <TextBlock Text="Статус: " FontSize="11" Foreground="#7F8C8D"/>
-                                        <TextBlock Text="{Binding активен}" FontSize="11" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding активен, Converter={StaticResource BooleanToTextConverter}}" 
+                                                   FontSize="11" FontWeight="SemiBold"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                         <TextBlock Text="Дата регистрации: " FontSize="11" Foreground="#7F8C8D"/>
@@ -98,6 +123,8 @@
                 <TextBlock>
                     <Run Text="Всего администраторов и врачей: "/>
                     <Run Text="{Binding Users.Count, Mode=OneWay}" FontWeight="Bold"/>
+                    <Run Text=" | Ваша роль: "/>
+                    <Run Text="{Binding CurrentUser.роль}" FontWeight="Bold"/>
                 </TextBlock>
             </StatusBarItem>
         </StatusBar>

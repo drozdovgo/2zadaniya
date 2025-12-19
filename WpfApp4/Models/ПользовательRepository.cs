@@ -111,12 +111,20 @@ namespace WpfApp4.Models
             {
                 using var context = new MyDatabaseContext(_connectionString);
                 var canConnect = context.Database.CanConnect();
-                System.Diagnostics.Debug.WriteLine($"🔌 Тест подключения MyDatabaseContext: {canConnect}");
+                System.Diagnostics.Debug.WriteLine($"🔌 Проверка подключения: {canConnect}");
+
+                if (canConnect)
+                {
+                    // Дополнительная проверка - попытка выполнить простой запрос
+                    var count = context.Запись.Count(); // или другая таблица
+                    System.Diagnostics.Debug.WriteLine($"✅ База доступна, записей в таблице: {count}");
+                }
+
                 return canConnect;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ Ошибка подключения к БД: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка подключения: {ex.Message}");
                 return false;
             }
         }

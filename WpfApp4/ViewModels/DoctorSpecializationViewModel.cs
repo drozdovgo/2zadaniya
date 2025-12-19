@@ -11,7 +11,6 @@ namespace WpfApp4.ViewModels
 {
     public class DoctorSpecializationViewModel : PropertyChangedBase
     {
-        private readonly MyDatabaseContext _dbContext;
         private readonly Пользователь _currentUser;
         private ObservableCollection<Врач> _doctors;
         private ObservableCollection<Врач> _filteredDoctors;
@@ -71,20 +70,21 @@ namespace WpfApp4.ViewModels
         public DoctorSpecializationViewModel(Пользователь currentUser)
         {
             _currentUser = currentUser;
-            _dbContext = new MyDatabaseContext("Data Source=medicalclinic.db");
 
             BackCommand = new MyCommand(_ => BackRequested?.Invoke());
             ClearFilterCommand = new MyCommand(_ => ClearFilter());
 
-            LoadData();
+            LoadData(); // Убрали создание _dbContext
         }
 
         private void LoadData()
         {
             try
             {
+                using var context = new MyDatabaseContext("Data Source=medicalclinic.db");
+
                 // Загружаем врачей с информацией о пользователе и специализации
-                var doctors = _dbContext.Врач
+                var doctors = context.Врач
                     .Include(d => d.Пользователь)
                     .Include(d => d.Специализация)
                     .Where(d => d.статус == "активен")
@@ -94,20 +94,8 @@ namespace WpfApp4.ViewModels
                 FilteredDoctors = new ObservableCollection<Врач>(doctors);
 
                 // Загружаем все специализации
-                var specializations = _dbContext.Специализация.ToList();
+                var specializations = context.Специализация.ToList();
                 Specializations = new ObservableCollection<Специализация>(specializations);
-
-                System.Diagnostics.Debug.WriteLine($"=== DoctorSpecializationView ===");
-                System.Diagnostics.Debug.WriteLine($"Загружено врачей: {doctors.Count}");
-                System.Diagnostics.Debug.WriteLine($"Загружено специализаций: {specializations.Count}");
-
-                // Проверка данных
-                foreach (var doctor in doctors.Take(5))
-                {
-                    System.Diagnostics.Debug.WriteLine($"Врач: {doctor.Пользователь?.ПолноеИмя}, " +
-                        $"Специализация: {doctor.Специализация?.название}, " +
-                        $"ID: {doctor.id}, Пользователь ID: {doctor.пользователь_id}");
-                }
             }
             catch (Exception ex)
             {
@@ -117,6 +105,7 @@ namespace WpfApp4.ViewModels
                 Specializations = new ObservableCollection<Специализация>();
             }
         }
+
 
         private void FilterDoctors()
         {

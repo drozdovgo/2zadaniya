@@ -64,6 +64,20 @@ namespace WpfApp4.ViewModels
             mainViewModel.LogoutRequested += OnLogout;
             mainViewModel.ViewDoctorSpecializationsRequested += ShowDoctorSpecializationView;
 
+            // Подписываемся на события в зависимости от роли
+            if (CurrentUser.роль == "пациент")
+            {
+                mainViewModel.ViewPatientAppointmentsRequested += ShowPatientAppointmentView;
+            }
+            else if (CurrentUser.роль == "врач")
+            {
+                mainViewModel.ViewDoctorScheduleRequested += ShowDoctorScheduleView;
+            }
+            else if (CurrentUser.роль == "администратор")
+            {
+                mainViewModel.ViewAdminScheduleRequested += ShowAdminScheduleView;
+            }
+
             CurrentViewModel = mainViewModel;
             WindowTitle = $"Медицинская клиника - {CurrentUser.ПолноеИмя}";
         }
@@ -77,6 +91,39 @@ namespace WpfApp4.ViewModels
 
             CurrentViewModel = doctorSpecializationViewModel;
             WindowTitle = $"Медицинская клиника - Выбор врача";
+        }
+
+        public void ShowPatientAppointmentView()
+        {
+            if (CurrentUser == null) return;
+
+            var patientAppointmentViewModel = new PatientAppointmentViewModel(CurrentUser);
+            patientAppointmentViewModel.BackRequested += ShowMainView;
+
+            CurrentViewModel = patientAppointmentViewModel;
+            WindowTitle = $"Медицинская клиника - Мои записи";
+        }
+
+        public void ShowDoctorScheduleView()
+        {
+            if (CurrentUser == null) return;
+
+            var doctorScheduleViewModel = new DoctorScheduleViewModel(CurrentUser);
+            doctorScheduleViewModel.BackRequested += ShowMainView;
+
+            CurrentViewModel = doctorScheduleViewModel;
+            WindowTitle = $"Медицинская клиника - Расписание врача";
+        }
+
+        public void ShowAdminScheduleView()
+        {
+            if (CurrentUser == null) return;
+
+            var adminScheduleViewModel = new AdminScheduleViewModel(CurrentUser);
+            adminScheduleViewModel.BackRequested += ShowMainView;
+
+            CurrentViewModel = adminScheduleViewModel;
+            WindowTitle = $"Медицинская клиника - Управление записями";
         }
 
         private void OnLoginSuccessful(Пользователь user)

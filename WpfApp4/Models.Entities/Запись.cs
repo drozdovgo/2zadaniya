@@ -65,13 +65,13 @@ namespace WpfApp4.Models.Entities
         public string диагноз
         {
             get => _диагноз;
-            set { _диагноз = value; OnPropertyChanged(nameof(диагноз)); }
+            set { _диагноз = value ?? string.Empty; OnPropertyChanged(nameof(диагноз)); }
         }
 
         public string рекомендации
         {
             get => _рекомендации;
-            set { _рекомендации = value; OnPropertyChanged(nameof(рекомендации)); }
+            set { _рекомендации = value ?? string.Empty; OnPropertyChanged(nameof(рекомендации)); }
         }
 
         public DateTime дата_создания
@@ -88,6 +88,20 @@ namespace WpfApp4.Models.Entities
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public Запись()
+        {
+            // Устанавливаем значения по умолчанию
+            симптомы = string.Empty;
+            диагноз = string.Empty;
+            рекомендации = string.Empty;
+            статус = "запланирована";
+            дата_создания = DateTime.Now;
+
+            // Устанавливаем дату записи по умолчанию (завтра)
+            дата_записи = DateTime.Now.AddDays(1);
+            время_записи = new TimeSpan(9, 0, 0);
         }
     }
 }

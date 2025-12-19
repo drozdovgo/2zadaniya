@@ -75,21 +75,27 @@ namespace WpfApp4.ViewModels
             {
                 IsLoading = true;
                 ErrorMessage = string.Empty;
+                System.Diagnostics.Debug.WriteLine($"=== Попытка входа ===");
 
                 var result = _authService.Login(LoginModel.Email, LoginModel.Password);
+                System.Diagnostics.Debug.WriteLine($"Результат входа: success={result.success}, message={result.message}");
 
                 if (result.success)
                 {
+                    System.Diagnostics.Debug.WriteLine($"✅ Вход успешен для пользователя: {result.user?.ПолноеИмя}");
                     LoginSuccessful?.Invoke(result.user);
                 }
                 else
                 {
                     ErrorMessage = result.message;
+                    System.Diagnostics.Debug.WriteLine($"❌ Ошибка входа: {result.message}");
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Ошибка: {ex.Message}";
+                ErrorMessage = $"Критическая ошибка: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"❌ Критическая ошибка входа: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
             }
             finally
             {
