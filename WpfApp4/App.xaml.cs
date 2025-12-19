@@ -59,11 +59,11 @@ namespace WpfApp4
             };
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
-                {
+            {
                 LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
                 e.SetObserved();
             };
-                }
+        }
 
         private void LogUnhandledException(Exception exception, string source)
         {

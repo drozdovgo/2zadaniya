@@ -26,7 +26,7 @@ namespace WpfApp4.Domain
 
             try
             {
-            Database.EnsureCreated();
+                Database.EnsureCreated();
                 System.Diagnostics.Debug.WriteLine("✅ База данных создана/проверена");
             }
             catch (Exception ex)

@@ -39,7 +39,7 @@
 
             <!-- Для всех пользователей -->
             <Button Content="Выбор врача по специализации" 
-            Command="{Binding ViewDoctorSpecializationsCommand}" 
+                    Command="{Binding ViewDoctorSpecializationsCommand}" 
                     Padding="10,5" Margin="5" Background="#3498DB" 
                     Foreground="White" FontWeight="Bold"/>
 

@@ -105,4 +105,3 @@ namespace WpfApp4.Models.Entities
         }
     }
 }
-

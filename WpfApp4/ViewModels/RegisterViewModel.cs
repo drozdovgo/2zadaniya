@@ -97,7 +97,7 @@ namespace WpfApp4.ViewModels
             return canRegister;
         }
 
-        
+
         private void Register()
         {
             try

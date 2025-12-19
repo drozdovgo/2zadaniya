@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using WpfApp4.Domain;
@@ -141,7 +141,7 @@ namespace WpfApp4.Services
                                 };
 
                                 context.Медицинская_карта.Add(medicalCard);
-                context.SaveChanges();
+                                context.SaveChanges();
                                 Debug.WriteLine($"✅ Создана медицинская карта для пациента {newUser.id}");
                             }
                             catch (Exception ex)
@@ -151,8 +151,8 @@ namespace WpfApp4.Services
                             }
                         }
 
-                return (true, "Регистрация прошла успешно");
-            }
+                        return (true, "Регистрация прошла успешно");
+                    }
                     else
                     {
                         Debug.WriteLine("⚠️ Не удалось сохранить пользователя");
@@ -177,7 +177,7 @@ namespace WpfApp4.Services
                 Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
 
                 if (ex.InnerException != null)
-            {
+                {
                     Debug.WriteLine($"Inner Exception: {ex.InnerException.Message}");
                 }
 
