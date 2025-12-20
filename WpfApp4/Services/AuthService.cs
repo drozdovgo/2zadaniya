@@ -5,6 +5,7 @@ using System.Linq;
 using WpfApp4.Domain;
 using WpfApp4.Models.Auth;
 using WpfApp4.Models.Entities;
+using WpfApp4.Utils;
 
 namespace WpfApp4.Services
 {
@@ -14,8 +15,7 @@ namespace WpfApp4.Services
 
         public AuthService()
         {
-            // Используем путь в папке приложения
-            _connectionString = "Data Source=medicalclinic.db";
+            _connectionString = DatabaseHelper.GetConnectionString();
             Debug.WriteLine($"AuthService: Используем строку подключения: {_connectionString}");
         }
 

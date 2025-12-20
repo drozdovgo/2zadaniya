@@ -61,6 +61,7 @@
                               IsReadOnly="True" Margin="10">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Пациент" Binding="{Binding Пациент.ПолноеИмя}" Width="150"/>
+                            <DataGridTextColumn Header="Телефон" Binding="{Binding Пациент.телефон}" Width="120"/>
                             <DataGridTextColumn Header="Дата" Binding="{Binding дата_записи, StringFormat='dd.MM.yyyy'}" Width="100"/>
                             <DataGridTextColumn Header="Время" Binding="{Binding время_записи, StringFormat='hh\\:mm'}" Width="80"/>
                             <DataGridTextColumn Header="Симптомы" Binding="{Binding симптомы}" Width="200"/>
@@ -111,9 +112,11 @@
                             <!-- Завершение записи -->
                             <StackPanel Grid.Column="1" Margin="10,0,10,0">
                                 <TextBlock Text="Завершение приема" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <TextBlock Text="Диагноз:" FontSize="11" Foreground="#7F8C8D" Margin="0,0,0,2"/>
                                 <TextBox Text="{Binding Diagnosis}" 
                                          Padding="10" Margin="0,0,0,5"
                                          VerticalAlignment="Center"/>
+                                <TextBlock Text="Рекомендации:" FontSize="11" Foreground="#7F8C8D" Margin="0,0,0,2"/>
                                 <TextBox Text="{Binding Recommendations}" 
                                          Padding="10" Margin="0,0,0,5"
                                          VerticalAlignment="Center"/>

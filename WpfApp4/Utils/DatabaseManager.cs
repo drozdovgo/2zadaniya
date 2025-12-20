@@ -14,6 +14,7 @@ namespace WpfApp4.Utils
             {
                 if (_dbContext == null)
                 {
+                    _dbContext = new MyDatabaseContext("Data Source=medicalclinic.db");
                     System.Diagnostics.Debug.WriteLine("✅ Создан единый контекст базы данных");
                 }
                 return _dbContext;
@@ -36,9 +37,18 @@ namespace WpfApp4.Utils
             {
                 try
                 {
-                    var context = GetContext();
+                    // Используем новый контекст для теста, не основной
+                    using var context = new MyDatabaseContext("Data Source=medicalclinic.db");
                     var canConnect = context.Database.CanConnect();
                     System.Diagnostics.Debug.WriteLine($"🔌 Проверка подключения: {canConnect}");
+
+                    if (canConnect)
+                    {
+                        // Дополнительная проверка
+                        var appointmentsCount = context.Запись.Count();
+                        System.Diagnostics.Debug.WriteLine($"✅ База доступна, записей: {appointmentsCount}");
+                    }
+
                     return canConnect;
                 }
                 catch (Exception ex)

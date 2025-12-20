@@ -1,17 +1,18 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using WpfApp4.Domain;
 using WpfApp4.Interfaces;
 using WpfApp4.Models.Entities;
+using WpfApp4.Utils;
 
 namespace WpfApp4.Models.Entities
 {
     public class AppointmentRepository : IRepository<Запись>
     {
         private static readonly object _dbLock = new object();
-        private readonly string _connectionString = "Data Source=medicalclinic.db";
+        private readonly string _connectionString = DatabaseHelper.GetConnectionString();
 
         public IEnumerable<Запись> GetAll()
         {
@@ -21,7 +22,7 @@ namespace WpfApp4.Models.Entities
                 {
                     using var context = new MyDatabaseContext(_connectionString);
                     var appointments = context.Запись
-                        .Include(z => z.Пациент)
+                        .Include(z => z.Пациент)  // Добавьте эту строку
                         .Include(z => z.Врач)
                         .ThenInclude(d => d.Пользователь)
                         .Include(z => z.Врач.Специализация)
@@ -38,6 +39,7 @@ namespace WpfApp4.Models.Entities
                 }
             }
         }
+
 
         public Запись? Get(int id)
         {
@@ -282,6 +284,7 @@ namespace WpfApp4.Models.Entities
 
                     using var context = new MyDatabaseContext(_connectionString);
                     var appointments = context.Запись
+                        .Include(z => z.Пациент)  // Важно: включаем данные пациента
                         .Include(z => z.Врач)
                         .ThenInclude(d => d.Пользователь)
                         .Include(z => z.Врач.Специализация)
@@ -292,6 +295,16 @@ namespace WpfApp4.Models.Entities
                         .ToList();
 
                     System.Diagnostics.Debug.WriteLine($"✅ Загружено {appointments.Count} записей для пациента {patientId}");
+
+                    // Логируем детали
+                    foreach (var app in appointments)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  Запись {app.id}: " +
+                            $"Врач: {app.Врач?.Пользователь?.ПолноеИмя ?? "Нет данных"}, " +
+                            $"Специализация: {app.Врач?.Специализация?.название ?? "Нет данных"}, " +
+                            $"Статус: {app.статус}");
+                    }
+
                     return appointments;
                 }
                 catch (Exception ex)
@@ -301,6 +314,7 @@ namespace WpfApp4.Models.Entities
                 }
             }
         }
+
 
         public List<Запись> GetDoctorAppointments(int doctorId)
         {
@@ -312,7 +326,10 @@ namespace WpfApp4.Models.Entities
 
                     using var context = new MyDatabaseContext(_connectionString);
                     var appointments = context.Запись
-                        .Include(z => z.Пациент)
+                        .Include(z => z.Пациент)  // Включаем данные пациента
+                        .Include(z => z.Врач)    // Включаем данные врача
+                        .ThenInclude(d => d.Пользователь)
+                        .Include(z => z.Врач.Специализация)
                         .Where(z => z.врач_id == doctorId)
                         .OrderByDescending(z => z.дата_записи)
                         .ThenBy(z => z.время_записи)
@@ -320,6 +337,17 @@ namespace WpfApp4.Models.Entities
                         .ToList();
 
                     System.Diagnostics.Debug.WriteLine($"✅ Загружено {appointments.Count} записей для врача {doctorId}");
+
+                    // Логируем детали
+                    foreach (var app in appointments)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  Запись {app.id}: " +
+                            $"Пациент: {app.Пациент?.ПолноеИмя ?? "Нет данных"}, " +
+                            $"Дата: {app.дата_записи:dd.MM.yyyy}, " +
+                            $"Время: {app.время_записи}, " +
+                            $"Статус: {app.статус}");
+                    }
+
                     return appointments;
                 }
                 catch (Exception ex)
@@ -329,6 +357,7 @@ namespace WpfApp4.Models.Entities
                 }
             }
         }
+
 
         public bool CancelAppointment(int id, string reason = "")
         {
@@ -425,6 +454,7 @@ namespace WpfApp4.Models.Entities
                         .Include(z => z.Пациент)
                         .Include(z => z.Врач)
                         .ThenInclude(d => d.Пользователь)
+                        .Include(z => z.Врач.Специализация)
                         .Where(z => z.дата_записи.Date == date.Date);
 
                     if (doctorId.HasValue)
@@ -444,6 +474,8 @@ namespace WpfApp4.Models.Entities
                 }
             }
         }
+
+
 
         public bool TestConnection()
         {

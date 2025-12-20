@@ -81,6 +81,7 @@ namespace WpfApp4.ViewModels
         {
             try
             {
+
                 using var context = new MyDatabaseContext("Data Source=medicalclinic.db");
 
                 // Загружаем врачей с информацией о пользователе и специализации
@@ -105,6 +106,7 @@ namespace WpfApp4.ViewModels
                 Specializations = new ObservableCollection<Специализация>();
             }
         }
+
 
 
         private void FilterDoctors()

@@ -142,17 +142,24 @@ namespace WpfApp4.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"=== Загрузка врачей для пациента ===");
 
-                // Просто создаем новый контекст
-                using var context = new MyDatabaseContext("Data Source=medicalclinic.db");
+                using var context = new MyDatabaseContext(DatabaseHelper.GetConnectionString());
 
                 var doctors = context.Врач
-                    .Include(d => d.Пользователь)
-                    .Include(d => d.Специализация)
+                    .Include(d => d.Пользователь)  // Включаем данные пользователя
+                    .Include(d => d.Специализация) // Включаем специализацию
                     .Where(d => d.статус == "активен")
                     .ToList();
 
                 Doctors = new ObservableCollection<Врач>(doctors);
                 System.Diagnostics.Debug.WriteLine($"✅ Загружено {doctors.Count} врачей");
+
+                // Логируем детали врачей
+                foreach (var doctor in doctors)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  Врач {doctor.id}: " +
+                        $"{doctor.Пользователь?.ПолноеИмя ?? "Нет данных"}, " +
+                        $"Специализация: {doctor.Специализация?.название ?? "Нет данных"}");
+                }
             }
             catch (Exception ex)
             {
@@ -160,6 +167,7 @@ namespace WpfApp4.ViewModels
                 Doctors = new ObservableCollection<Врач>();
             }
         }
+
 
         private void CreateAppointment()
         {

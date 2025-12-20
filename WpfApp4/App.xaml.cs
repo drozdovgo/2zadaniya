@@ -7,80 +7,62 @@ namespace WpfApp4
 {
     public partial class App : Application
     {
-        private static readonly object _dbLock = new object();
-        private static MyDatabaseContext _dbContext;
-
-        public static MyDatabaseContext GetDbContext()
-        {
-            lock (_dbLock)
-            {
-                if (_dbContext == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("✅ Создан единый контекст базы данных");
-                }
-                return _dbContext;
-            }
-        }
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            // Инициализируем базу при старте
             try
             {
-                System.Diagnostics.Debug.WriteLine("=== Инициализация базы данных ===");
-                var canConnect = DatabaseManager.TestConnection();
+                System.Diagnostics.Debug.WriteLine("=== ЗАПУСК ПРИЛОЖЕНИЯ ===");
+                System.Diagnostics.Debug.WriteLine($"Версия: {GetType().Assembly.GetName().Version}");
+                System.Diagnostics.Debug.WriteLine($"Дата запуска: {DateTime.Now}");
+
+                // Печатаем информацию о базе данных
+                WpfApp4.Utils.DatabaseHelper.PrintDatabaseInfo();
+
+                // Проверяем текущую директорию
+                System.Diagnostics.Debug.WriteLine($"Текущая директория: {AppDomain.CurrentDomain.BaseDirectory}");
+
+                // Создаем контекст с использованием DatabaseHelper
+                string connectionString = WpfApp4.Utils.DatabaseHelper.GetConnectionString();
+                System.Diagnostics.Debug.WriteLine($"Используем строку подключения: {connectionString}");
+
+                using var context = new WpfApp4.Domain.MyDatabaseContext(connectionString);
+
+                // Проверяем подключение
+                var canConnect = context.Database.CanConnect();
                 System.Diagnostics.Debug.WriteLine($"База данных доступна: {canConnect}");
+
+                if (canConnect)
+                {
+                    System.Diagnostics.Debug.WriteLine($"=== ДАННЫЕ В БАЗЕ ===");
+                    System.Diagnostics.Debug.WriteLine($"• Пользователей: {context.Пользователь.Count()}");
+                    System.Diagnostics.Debug.WriteLine($"• Врачей: {context.Врач.Count()}");
+                    System.Diagnostics.Debug.WriteLine($"• Пациентов: {context.Пользователь.Count(u => u.роль == "пациент")}");
+                    System.Diagnostics.Debug.WriteLine($"• Администраторов: {context.Пользователь.Count(u => u.роль == "администратор")}");
+                    System.Diagnostics.Debug.WriteLine($"• Записей: {context.Запись.Count()}");
+                    System.Diagnostics.Debug.WriteLine($"• Специализаций: {context.Специализация.Count()}");
+
+                    // Выводим первых 5 пользователей для проверки
+                    var sampleUsers = context.Пользователь.Take(5).ToList();
+                    System.Diagnostics.Debug.WriteLine($"Пример пользователей ({sampleUsers.Count}):");
+                    foreach (var user in sampleUsers)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  - {user.email} ({user.роль})");
+                    }
+                }
+
+                // Открываем папку с базой данных (опционально)
+                // WpfApp4.Utils.DatabaseHelper.OpenDatabaseFolder();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ Ошибка инициализации базы: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Критическая ошибка при запуске: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                MessageBox.Show($"Ошибка при запуске приложения: {ex.Message}\n\nПроверьте права доступа к папке приложения.",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            SetupExceptionHandling();
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            DatabaseManager.CloseConnection();
-            base.OnExit(e);
-        }
-
-        private void SetupExceptionHandling()
-        {
-            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
-                LogUnhandledException((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
-
-            DispatcherUnhandledException += (s, e) =>
-            {
-                LogUnhandledException(e.Exception, "Application.Current.DispatcherUnhandledException");
-                e.Handled = true;
-            };
-
-            TaskScheduler.UnobservedTaskException += (s, e) =>
-            {
-                LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
-                e.SetObserved();
-            };
-        }
-
-        private void LogUnhandledException(Exception exception, string source)
-        {
-            string message = $"Необработанное исключение ({source}): {exception.Message}";
-            try
-            {
-                System.Reflection.AssemblyName assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName();
-                message = string.Format("Необработанное исключение в {0} v{1}\nИсточник: {2}\n{3}\n\n{4}",
-                    assemblyName.Name, assemblyName.Version, source, exception.Message, exception.StackTrace);
-            }
-            catch (Exception ex)
-            {
-                message = $"Ошибка при создании сообщения об исключении: {ex.Message}\nИсходное исключение: {exception.Message}";
-            }
-
-            System.Diagnostics.Debug.WriteLine(message);
-            MessageBox.Show(message, "Необработанное исключение", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

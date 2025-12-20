@@ -4,12 +4,13 @@ using System.Linq;
 using WpfApp4.Domain;
 using WpfApp4.Interfaces;
 using WpfApp4.Models.Entities;
+using WpfApp4.Utils;
 
 namespace WpfApp4.Models
 {
     public class ПользовательRepository : IRepository<Пользователь>
     {
-        private readonly string _connectionString = "Data Source=medicalclinic.db";
+        private readonly string _connectionString = DatabaseHelper.GetConnectionString();
 
         public IEnumerable<Пользователь> GetAll()
         {

@@ -17,5 +17,23 @@ namespace WpfApp4.Views
                 viewModel.LoginModel.Password = ((PasswordBox)sender).Password;
             }
         }
+
+        private void CheckDatabaseButton_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("=== РУЧНАЯ ПРОВЕРКА БАЗЫ ДАННЫХ ===");
+            WpfApp4.Utils.DatabaseHelper.PrintDatabaseInfo();
+
+            MessageBox.Show(
+                $"Информация о базе данных:\n\n" +
+                $"Файл: medicalclinic.db\n" +
+                $"Папка: {WpfApp4.Utils.DatabaseHelper.GetDatabaseFolderPath()}\n" +
+                $"Существует: {WpfApp4.Utils.DatabaseHelper.DatabaseExists()}\n" +
+                $"Размер: {WpfApp4.Utils.DatabaseHelper.GetDatabaseSize()} байт\n\n" +
+                $"Подробности смотрите в Output окне.",
+                "Информация о базе данных",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+        }
     }
 }

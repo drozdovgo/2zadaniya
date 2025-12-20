@@ -83,6 +83,9 @@ namespace WpfApp4.Models.Entities
 
         public virtual Пользователь Пациент { get; set; }
         public virtual Врач Врач { get; set; }
+        public virtual Пользователь Пользователь { get; set; }
+        public virtual Специализация Специализация { get; set; }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
