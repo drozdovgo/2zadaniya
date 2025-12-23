@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WpfApp4.Domain;
@@ -6,128 +7,75 @@ using WpfApp4.Interfaces;
 using WpfApp4.Models.Entities;
 using WpfApp4.Utils;
 
-namespace WpfApp4.Models
+namespace WpfApp4.Models.Entities
 {
-    public class ПользовательRepository : IRepository<Пользователь>
+    public class ПользовательRepository : IRepository<Запись>
     {
-        private readonly string _connectionString = DatabaseHelper.GetConnectionString();
+        private readonly string _connectionString;
 
-        public IEnumerable<Пользователь> GetAll()
+        public ПользовательRepository()
         {
-            try
-            {
-                using var context = new MyDatabaseContext(_connectionString);
-                var users = context.Пользователь.ToList();
-                System.Diagnostics.Debug.WriteLine($"✅ MyDatabaseContext: Загружено {users.Count} пользователей");
-                return users;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ Ошибка получения данных: {ex.Message}");
-                return new List<Пользователь>();
-            }
+            _connectionString = ConnectionManager.GetConnectionString();
         }
 
-        public Пользователь? Get(int id)
+        public IEnumerable<Запись> GetAll()
         {
-            try
-            {
-                using var context = new MyDatabaseContext(_connectionString);
-                return context.Пользователь.FirstOrDefault(u => u.id == id);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка получения пользователя: {ex.Message}");
-                return null;
-            }
+            using var context = new MyDatabaseContext(_connectionString);
+            return context.Запись
+                .Include(z => z.Пациент)
+                .Include(z => z.Врач)
+                .ThenInclude(d => d.Пользователь)
+                .Include(z => z.Врач.Специализация)
+                .AsNoTracking()
+                .ToList();
         }
 
-        public bool Add(Пользователь user)
+        // ... остальные методы без lock и debug
+        public Запись? Get(int id)
         {
-            try
-            {
-                using var context = new MyDatabaseContext(_connectionString);
-                context.Пользователь.Add(user);
-                var result = context.SaveChanges();
-                System.Diagnostics.Debug.WriteLine($"✅ Пользователь добавлен, изменений: {result}");
-                return result > 0;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ Ошибка добавления пользователя: {ex.Message}");
-                return false;
-            }
+            using var context = new MyDatabaseContext(_connectionString);
+            return context.Запись
+                .Include(z => z.Пациент)
+                .Include(z => z.Врач)
+                .FirstOrDefault(z => z.id == id);
+        }
+
+        public bool Add(Запись entity)
+        {
+            using var context = new MyDatabaseContext(_connectionString);
+            context.Запись.Add(entity);
+            return context.SaveChanges() > 0;
         }
 
         public bool Remove(int id)
         {
-            try
+            using var context = new MyDatabaseContext(_connectionString);
+            var appointment = context.Запись.Find(id);
+            if (appointment != null)
             {
-                using var context = new MyDatabaseContext(_connectionString);
-                var user = context.Пользователь.Find(id);
-                if (user != null)
-                {
-                    context.Пользователь.Remove(user);
-                    var result = context.SaveChanges();
-                    return result > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка удаления пользователя: {ex.Message}");
+                context.Запись.Remove(appointment);
+                return context.SaveChanges() > 0;
             }
             return false;
         }
 
-        public bool Update(int id, Пользователь entity)
+        public bool Update(int id, Запись entity)
         {
-            try
+            using var context = new MyDatabaseContext(_connectionString);
+            var appointment = context.Запись.Find(id);
+            if (appointment != null)
             {
-                using var context = new MyDatabaseContext(_connectionString);
-                var user = context.Пользователь.Find(id);
-                if (user != null)
-                {
-                    user.email = entity.email;
-                    user.пароль = entity.пароль;
-                    user.роль = entity.роль;
-                    user.имя = entity.имя;
-                    user.фамилия = entity.фамилия;
-                    user.телефон = entity.телефон;
-                    user.дата_рождения = entity.дата_рождения;
-                    user.активен = entity.активен;
-                    var result = context.SaveChanges();
-                    return result > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка обновления пользователя: {ex.Message}");
+                appointment.пациент_id = entity.пациент_id;
+                appointment.врач_id = entity.врач_id;
+                appointment.дата_записи = entity.дата_записи;
+                appointment.время_записи = entity.время_записи;
+                appointment.статус = entity.статус ?? "запланирована";
+                appointment.симптомы = entity.симптомы ?? string.Empty;
+                appointment.диагноз = entity.диагноз ?? string.Empty;
+                appointment.рекомендации = entity.рекомендации ?? string.Empty;
+                return context.SaveChanges() > 0;
             }
             return false;
-        }
-
-        public bool TestConnection()
-        {
-            try
-            {
-                using var context = new MyDatabaseContext(_connectionString);
-                var canConnect = context.Database.CanConnect();
-                System.Diagnostics.Debug.WriteLine($"🔌 Проверка подключения: {canConnect}");
-
-                if (canConnect)
-                {
-                    // Дополнительная проверка - попытка выполнить простой запрос
-                    var count = context.Запись.Count(); // или другая таблица
-                    System.Diagnostics.Debug.WriteLine($"✅ База доступна, записей в таблице: {count}");
-                }
-
-                return canConnect;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ Ошибка подключения: {ex.Message}");
-                return false;
-            }
         }
     }
 }

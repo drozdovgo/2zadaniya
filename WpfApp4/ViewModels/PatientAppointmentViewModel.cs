@@ -142,7 +142,7 @@ namespace WpfApp4.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"=== Загрузка врачей для пациента ===");
 
-                using var context = new MyDatabaseContext(DatabaseHelper.GetConnectionString());
+                using var context = new MyDatabaseContext(ConnectionManager.GetConnectionString());
 
                 var doctors = context.Врач
                     .Include(d => d.Пользователь)  // Включаем данные пользователя

@@ -97,12 +97,6 @@
                             Padding="5,2"/>
 
                     <TextBlock Text=" • " Foreground="#7F8C8D"/>
-                    <Button Content="Проверить базу данных" 
-                            Click="CheckDatabaseButton_Click"
-                            Background="Transparent" 
-                            BorderThickness="0" 
-                            Foreground="#3498DB"
-                            Padding="5,2"/>
 
                     <Button Content="Выйти" 
                             Command="{Binding CloseCommand}"

@@ -255,7 +255,7 @@ namespace WpfApp4.ViewModels
         {
             try
             {
-                using var context = new MyDatabaseContext(DatabaseHelper.GetConnectionString());
+                using var context = new MyDatabaseContext(ConnectionManager.GetConnectionString());
                 var doctors = context.Врач
                     .Include(d => d.Пользователь)
                     .Include(d => d.Специализация)
