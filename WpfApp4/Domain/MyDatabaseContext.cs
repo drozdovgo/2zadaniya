@@ -56,10 +56,12 @@ namespace WpfApp4.Domain
                 entity.HasKey(e => e.id);
                 entity.HasOne(e => e.Пользователь)
                       .WithOne()
-                      .HasForeignKey<Врач>(e => e.пользователь_id);
+                      .HasForeignKey<Врач>(e => e.пользователь_id)
+                      .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.Специализация)
                       .WithMany()
-                      .HasForeignKey(e => e.специализация_id);
+                      .HasForeignKey(e => e.специализация_id)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.Property(e => e.рейтинг).HasDefaultValue(0.00m);
                 entity.Property(e => e.статус).HasConversion<string>().HasDefaultValue("активен");
             });
@@ -70,7 +72,8 @@ namespace WpfApp4.Domain
                 entity.HasKey(e => e.id);
                 entity.HasOne(e => e.Пользователь)
                       .WithOne()
-                      .HasForeignKey<Медицинская_карта>(e => e.пациент_id);
+                      .HasForeignKey<Медицинская_карта>(e => e.пациент_id)
+                      .OnDelete(DeleteBehavior.Cascade);
                 entity.Property(e => e.дата_создания).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.дата_обновления).HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
@@ -81,15 +84,19 @@ namespace WpfApp4.Domain
                 entity.HasKey(e => e.id);
                 entity.HasOne(e => e.Пациент)
                       .WithMany()
-                      .HasForeignKey(e => e.пациент_id);
+                      .HasForeignKey(e => e.пациент_id)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Врач)
                       .WithMany()
-                      .HasForeignKey(e => e.врач_id);
+                      .HasForeignKey(e => e.врач_id)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.Property(e => e.статус).HasConversion<string>().HasDefaultValue("запланирована");
                 entity.Property(e => e.дата_создания).HasDefaultValueSql("CURRENT_TIMESTAMP");
-                entity.Property(e => e.симптомы).HasDefaultValue("");
+                entity.Property(e => e.симптомы).HasDefaultValue("").IsRequired();
                 entity.Property(e => e.диагноз).HasDefaultValue("");
                 entity.Property(e => e.рекомендации).HasDefaultValue("");
+                entity.Property(e => e.дата_записи).IsRequired();
+                entity.Property(e => e.время_записи).IsRequired();
             });
 
             modelBuilder.Entity<Расписание>(entity =>
@@ -98,7 +105,8 @@ namespace WpfApp4.Domain
                 entity.HasKey(e => e.id);
                 entity.HasOne(e => e.Врач)
                       .WithMany()
-                      .HasForeignKey(e => e.врач_id);
+                      .HasForeignKey(e => e.врач_id)
+                      .OnDelete(DeleteBehavior.Cascade);
                 entity.Property(e => e.день_недели).HasConversion<string>();
                 entity.Property(e => e.активен).HasDefaultValue(true);
             });
@@ -109,7 +117,8 @@ namespace WpfApp4.Domain
                 entity.HasKey(e => e.id);
                 entity.HasOne(e => e.Запись)
                       .WithOne()
-                      .HasForeignKey<Отзыв>(e => e.запись_id);
+                      .HasForeignKey<Отзыв>(e => e.запись_id)
+                      .OnDelete(DeleteBehavior.Cascade);
                 entity.Property(e => e.дата_создания).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.одобрен).HasDefaultValue(false);
             });

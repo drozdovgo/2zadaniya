@@ -75,26 +75,16 @@ namespace WpfApp4.ViewModels
         private bool CanRegister()
         {
             // Добавим отладку
-            System.Diagnostics.Debug.WriteLine($"=== CanRegister проверка ===");
-            System.Diagnostics.Debug.WriteLine($"Email: {RegisterModel.Email}, пустой: {string.IsNullOrWhiteSpace(RegisterModel.Email)}");
-            System.Diagnostics.Debug.WriteLine($"Password: длина {RegisterModel.Password?.Length}");
-            System.Diagnostics.Debug.WriteLine($"ConfirmPassword: длина {RegisterModel.ConfirmPassword?.Length}");
-            System.Diagnostics.Debug.WriteLine($"FirstName: {RegisterModel.FirstName}, пустой: {string.IsNullOrWhiteSpace(RegisterModel.FirstName)}");
-            System.Diagnostics.Debug.WriteLine($"LastName: {RegisterModel.LastName}, пустой: {string.IsNullOrWhiteSpace(RegisterModel.LastName)}");
-            System.Diagnostics.Debug.WriteLine($"IsLoading: {IsLoading}");
+            return !string.IsNullOrWhiteSpace(RegisterModel.Email) &&
+               !string.IsNullOrWhiteSpace(RegisterModel.Password) &&
+               !string.IsNullOrWhiteSpace(RegisterModel.ConfirmPassword) &&
+               !string.IsNullOrWhiteSpace(RegisterModel.FirstName) &&
+               !string.IsNullOrWhiteSpace(RegisterModel.LastName) &&
+               !string.IsNullOrWhiteSpace(RegisterModel.Phone) &&
+               RegisterModel.Password.Length >= 6 &&
+               RegisterModel.Password == RegisterModel.ConfirmPassword &&
+               !IsLoading;
 
-            bool canRegister = !string.IsNullOrWhiteSpace(RegisterModel.Email) &&
-                               !string.IsNullOrWhiteSpace(RegisterModel.Password) &&
-                               !string.IsNullOrWhiteSpace(RegisterModel.ConfirmPassword) &&
-                               !string.IsNullOrWhiteSpace(RegisterModel.FirstName) &&
-                               !string.IsNullOrWhiteSpace(RegisterModel.LastName) &&
-                               RegisterModel.Password.Length >= 6 &&
-                               RegisterModel.Password == RegisterModel.ConfirmPassword &&
-                               !IsLoading;
-
-            System.Diagnostics.Debug.WriteLine($"CanRegister результат: {canRegister}");
-
-            return canRegister;
         }
 
 

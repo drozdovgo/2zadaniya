@@ -108,7 +108,7 @@
                 <TextBlock Grid.Row="0" Text="Мои записи:" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
 
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding Appointments}">
+                    <ItemsControl ItemsSource="{Binding Appointments, UpdateSourceTrigger=PropertyChanged}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="White" BorderBrush="#E1E5E9" BorderThickness="1" 

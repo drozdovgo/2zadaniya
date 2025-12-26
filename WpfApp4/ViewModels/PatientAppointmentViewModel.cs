@@ -40,19 +40,35 @@ namespace WpfApp4.ViewModels
         public Врач SelectedDoctor
         {
             get => _selectedDoctor;
-            set { _selectedDoctor = value; OnPropertyChanged(); }
+            set
+            {
+                _selectedDoctor = value;
+                OnPropertyChanged();
+                if (value != null)
+                    System.Diagnostics.Debug.WriteLine($"Выбран врач: ID={value.id}, Имя={value.Пользователь?.ПолноеИмя}");
+            }
         }
 
         public DateTime SelectedDate
         {
             get => _selectedDate;
-            set { _selectedDate = value; OnPropertyChanged(); }
+            set
+            {
+                _selectedDate = value;
+                OnPropertyChanged();
+                System.Diagnostics.Debug.WriteLine($"Выбрана дата: {value:dd.MM.yyyy}");
+            }
         }
 
         public TimeSpan SelectedTime
         {
             get => _selectedTime;
-            set { _selectedTime = value; OnPropertyChanged(); }
+            set
+            {
+                _selectedTime = value;
+                OnPropertyChanged();
+                System.Diagnostics.Debug.WriteLine($"Выбрано время: {value:hh\\:mm}");
+            }
         }
 
         public string Symptoms
@@ -112,6 +128,9 @@ namespace WpfApp4.ViewModels
             _currentUser = currentUser;
             _appointmentRepository = new AppointmentRepository();
 
+            System.Diagnostics.Debug.WriteLine($"=== Инициализация PatientAppointmentViewModel ===");
+            System.Diagnostics.Debug.WriteLine($"Пациент: ID={_currentUser.id}, Имя={_currentUser.ПолноеИмя}");
+
             CreateAppointmentCommand = new MyCommand(_ => CreateAppointment());
             CancelAppointmentCommand = new MyCommand(_ => CancelAppointment());
             BackCommand = new MyCommand(_ => BackRequested?.Invoke());
@@ -119,19 +138,44 @@ namespace WpfApp4.ViewModels
 
             LoadData();
             LoadDoctors();
+
+            // Проверяем базу данных
+            CheckDatabase();
         }
 
         private void LoadData()
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("=== Загрузка записей пациента ===");
+                System.Diagnostics.Debug.WriteLine($"ID пациента: {_currentUser.id}");
+
                 var appointments = _appointmentRepository.GetPatientAppointments(_currentUser.id);
+
+                System.Diagnostics.Debug.WriteLine($"Найдено записей: {appointments.Count}");
+                foreach (var app in appointments)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  Запись ID={app.id}, " +
+                        $"Врач={app.Врач?.Пользователь?.ПолноеИмя ?? "Нет данных"}, " +
+                        $"Дата={app.дата_записи:dd.MM.yyyy}, " +
+                        $"Время={app.время_записи:hh\\:mm}, " +
+                        $"Статус={app.статус}");
+                }
+
                 Appointments = new ObservableCollection<Запись>(appointments);
-                System.Diagnostics.Debug.WriteLine($"✅ Загружено {appointments.Count} записей для пациента {_currentUser.id}");
+
+                // Принудительно обновляем UI
+                OnPropertyChanged(nameof(Appointments));
+
+                if (appointments.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("⚠️ У пациента нет записей");
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Ошибка загрузки записей: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 Appointments = new ObservableCollection<Запись>();
             }
         }
@@ -140,14 +184,14 @@ namespace WpfApp4.ViewModels
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"=== Загрузка врачей для пациента ===");
+                System.Diagnostics.Debug.WriteLine("=== Загрузка врачей ===");
 
                 using var context = new MyDatabaseContext(ConnectionManager.GetConnectionString());
 
                 var doctors = context.Врач
-                    .Include(d => d.Пользователь)  // Включаем данные пользователя
-                    .Include(d => d.Специализация) // Включаем специализацию
-                    .Where(d => d.статус == "активен")
+                    .Include(d => d.Пользователь)
+                    .Include(d => d.Специализация)
+                    .Where(d => d.статус == "активен" && d.Пользователь != null)
                     .ToList();
 
                 Doctors = new ObservableCollection<Врач>(doctors);
@@ -156,24 +200,42 @@ namespace WpfApp4.ViewModels
                 // Логируем детали врачей
                 foreach (var doctor in doctors)
                 {
-                    System.Diagnostics.Debug.WriteLine($"  Врач {doctor.id}: " +
+                    System.Diagnostics.Debug.WriteLine($"  Врач ID={doctor.id}: " +
                         $"{doctor.Пользователь?.ПолноеИмя ?? "Нет данных"}, " +
                         $"Специализация: {doctor.Специализация?.название ?? "Нет данных"}");
+                }
+
+                // Выбираем первого врача по умолчанию
+                if (doctors.Count > 0)
+                {
+                    SelectedDoctor = doctors[0];
+                    System.Diagnostics.Debug.WriteLine($"Выбран врач по умолчанию: {SelectedDoctor.Пользователь?.ПолноеИмя}");
+                }
+                else
+                {
+                    ErrorMessage = "Нет доступных врачей";
+                    System.Diagnostics.Debug.WriteLine("⚠️ Нет доступных врачей");
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Ошибка загрузки врачей: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 Doctors = new ObservableCollection<Врач>();
+                ErrorMessage = $"Ошибка загрузки врачей: {ex.Message}";
             }
         }
-
 
         private void CreateAppointment()
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"=== Создание записи пациентом ===");
+                System.Diagnostics.Debug.WriteLine("=== Создание записи ===");
+                System.Diagnostics.Debug.WriteLine($"Пациент ID: {_currentUser.id}");
+                System.Diagnostics.Debug.WriteLine($"Выбран врач ID: {SelectedDoctor?.id}");
+                System.Diagnostics.Debug.WriteLine($"Дата: {SelectedDate:dd.MM.yyyy}");
+                System.Diagnostics.Debug.WriteLine($"Время: {SelectedTime:hh\\:mm}");
+                System.Diagnostics.Debug.WriteLine($"Симптомы: {Symptoms}");
 
                 ErrorMessage = string.Empty;
                 SuccessMessage = string.Empty;
@@ -208,25 +270,31 @@ namespace WpfApp4.ViewModels
                     return;
                 }
 
+                // Проверяем, что врач активен
+                using (var context = new MyDatabaseContext(ConnectionManager.GetConnectionString()))
+                {
+                    var doctor = context.Врач.FirstOrDefault(d => d.id == SelectedDoctor.id);
+                    if (doctor == null || doctor.статус != "активен")
+                    {
+                        ErrorMessage = "Выбранный врач не активен или не существует";
+                        System.Diagnostics.Debug.WriteLine($"❌ Врач ID={SelectedDoctor.id} не активен или не найден");
+                        return;
+                    }
+                }
+
                 // Создаем новую запись
                 var newAppointment = new Запись
                 {
                     пациент_id = _currentUser.id,
                     врач_id = SelectedDoctor.id,
-                    дата_записи = SelectedDate,
+                    дата_записи = SelectedDate.Date, // Убедимся, что это только дата
                     время_записи = SelectedTime,
-                    симптомы = Symptoms,
-                    диагноз = string.Empty,
-                    рекомендации = string.Empty,
+                    симптомы = Symptoms.Trim(),
                     статус = "запланирована",
                     дата_создания = DateTime.Now
                 };
 
-                System.Diagnostics.Debug.WriteLine($"Отправка записи в репозиторий: " +
-                    $"Пациент={_currentUser.id}, " +
-                    $"Врач={SelectedDoctor.id}, " +
-                    $"Дата={SelectedDate:dd.MM.yyyy}, " +
-                    $"Время={SelectedTime}");
+                System.Diagnostics.Debug.WriteLine("Попытка сохранения записи...");
 
                 if (_appointmentRepository.Add(newAppointment))
                 {
@@ -235,6 +303,9 @@ namespace WpfApp4.ViewModels
 
                     // Обновляем список записей
                     LoadData();
+
+                    // Также перезагружаем врачей на случай изменений
+                    LoadDoctors();
 
                     System.Diagnostics.Debug.WriteLine("✅ Запись успешно создана");
 
@@ -249,19 +320,48 @@ namespace WpfApp4.ViewModels
                 }
                 else
                 {
-                    ErrorMessage = "Ошибка при создании записи. Возможно:\n" +
-                                 "1. Выбранное время уже занято\n" +
-                                 "2. Врач не активен\n" +
-                                 "3. Проблема с подключением к базе данных";
-                    System.Diagnostics.Debug.WriteLine("❌ Ошибка при создании записи (вернулось false)");
+                    ErrorMessage = "Ошибка при создании записи. Пожалуйста, попробуйте позже.";
+                    System.Diagnostics.Debug.WriteLine("❌ Ошибка при создании записи (Add вернул false)");
+                }
+            }
+            catch (DbUpdateException dbEx)
+            {
+                string detailedError = GetDetailedErrorMessage(dbEx);
+                ErrorMessage = $"Ошибка базы данных: {detailedError}";
+                System.Diagnostics.Debug.WriteLine($"❌ DbUpdateException: {detailedError}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {dbEx.StackTrace}");
+
+                // Показываем более понятное сообщение пользователю
+                if (detailedError.Contains("FOREIGN KEY constraint failed"))
+                {
+                    ErrorMessage = "Ошибка: выбранный врач не существует или не активен";
+                }
+                else if (detailedError.Contains("UNIQUE constraint failed"))
+                {
+                    ErrorMessage = "Ошибка: на это время уже есть запись";
                 }
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"Ошибка: {ex.Message}";
-                System.Diagnostics.Debug.WriteLine($"❌ Исключение при создании записи: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Exception: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
             }
+        }
+
+        private string GetDetailedErrorMessage(DbUpdateException dbEx)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine(dbEx.Message);
+
+            var inner = dbEx.InnerException;
+            while (inner != null)
+            {
+                sb.AppendLine($"  -> {inner.Message}");
+                inner = inner.InnerException;
+            }
+
+            return sb.ToString();
         }
 
         private void CancelAppointment()
@@ -277,13 +377,6 @@ namespace WpfApp4.ViewModels
             {
                 ErrorMessage = "Эта запись уже отменена";
                 System.Diagnostics.Debug.WriteLine($"❌ Запись ID={SelectedAppointment.id} уже отменена");
-                return;
-            }
-
-            if (SelectedAppointment.дата_записи < DateTime.Now)
-            {
-                ErrorMessage = "Нельзя отменить прошедшую запись";
-                System.Diagnostics.Debug.WriteLine($"❌ Запись ID={SelectedAppointment.id} уже прошла");
                 return;
             }
 
@@ -311,6 +404,58 @@ namespace WpfApp4.ViewModels
             {
                 ErrorMessage = "Ошибка при отмене записи";
                 System.Diagnostics.Debug.WriteLine($"❌ Не удалось отменить запись ID={SelectedAppointment.id}");
+            }
+        }
+
+        private void CheckDatabase()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("=== Проверка базы данных ===");
+
+                using var context = new MyDatabaseContext(ConnectionManager.GetConnectionString());
+
+                // Проверяем таблицы
+                var userCount = context.Пользователь.Count();
+                var doctorCount = context.Врач.Count();
+                var appointmentCount = context.Запись.Count();
+
+                System.Diagnostics.Debug.WriteLine($"Всего пользователей: {userCount}");
+                System.Diagnostics.Debug.WriteLine($"Всего врачей: {doctorCount}");
+                System.Diagnostics.Debug.WriteLine($"Всего записей: {appointmentCount}");
+
+                // Проверяем конкретного пациента
+                var patient = context.Пользователь.FirstOrDefault(p => p.id == _currentUser.id);
+                if (patient != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Пациент найден: ID={patient.id}, {patient.ПолноеИмя}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"⚠️ Пациент ID={_currentUser.id} не найден в БД");
+                }
+
+                // Проверяем все записи пациента
+                var allPatientApps = context.Запись
+                    .Where(z => z.пациент_id == _currentUser.id)
+                    .Include(z => z.Врач)
+                        .ThenInclude(d => d.Пользователь)
+                    .ToList();
+
+                System.Diagnostics.Debug.WriteLine($"Записей пациента {_currentUser.id}: {allPatientApps.Count}");
+                foreach (var app in allPatientApps)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  ID={app.id}, " +
+                        $"Врач={app.Врач?.Пользователь?.ПолноеИмя ?? "Нет"}, " +
+                        $"Дата={app.дата_записи:dd.MM.yyyy}, " +
+                        $"Время={app.время_записи:hh\\:mm}, " +
+                        $"Статус={app.статус}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка проверки БД: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
             }
         }
     }

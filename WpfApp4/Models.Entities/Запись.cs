@@ -83,8 +83,6 @@ namespace WpfApp4.Models.Entities
 
         public virtual Пользователь Пациент { get; set; }
         public virtual Врач Врач { get; set; }
-        public virtual Пользователь Пользователь { get; set; }
-        public virtual Специализация Специализация { get; set; }
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -101,9 +99,7 @@ namespace WpfApp4.Models.Entities
             рекомендации = string.Empty;
             статус = "запланирована";
             дата_создания = DateTime.Now;
-
-            // Устанавливаем дату записи по умолчанию (завтра)
-            дата_записи = DateTime.Now.AddDays(1);
+            дата_записи = DateTime.Now.AddDays(1).Date;
             время_записи = new TimeSpan(9, 0, 0);
         }
     }

@@ -21,12 +21,17 @@ namespace WpfApp4.Models.Entities
         public IEnumerable<Запись> GetAll()
         {
             using var context = new MyDatabaseContext(_connectionString);
-            return context.Запись
+            var appointments = context.Запись
                 .Include(z => z.Пациент)
                 .Include(z => z.Врач)
                 .ThenInclude(d => d.Пользователь)
                 .Include(z => z.Врач.Специализация)
-                .AsNoTracking()
+                .ToList(); // Сначала загружаем в память
+
+            // Сортируем в памяти
+            return appointments
+                .OrderByDescending(z => z.дата_записи)
+                .ThenBy(z => z.время_записи)
                 .ToList();
         }
 
@@ -81,30 +86,36 @@ namespace WpfApp4.Models.Entities
         public List<Запись> GetPatientAppointments(int patientId)
         {
             using var context = new MyDatabaseContext(_connectionString);
-            return context.Запись
+            var appointments = context.Запись
                 .Include(z => z.Пациент)
                 .Include(z => z.Врач)
                 .ThenInclude(d => d.Пользователь)
                 .Include(z => z.Врач.Специализация)
                 .Where(z => z.пациент_id == patientId)
+                .ToList(); // Сначала загружаем в память
+
+            // Сортируем в памяти
+            return appointments
                 .OrderByDescending(z => z.дата_записи)
                 .ThenBy(z => z.время_записи)
-                .AsNoTracking()
                 .ToList();
         }
 
         public List<Запись> GetDoctorAppointments(int doctorId)
         {
             using var context = new MyDatabaseContext(_connectionString);
-            return context.Запись
+            var appointments = context.Запись
                 .Include(z => z.Пациент)
                 .Include(z => z.Врач)
                 .ThenInclude(d => d.Пользователь)
                 .Include(z => z.Врач.Специализация)
                 .Where(z => z.врач_id == doctorId)
+                .ToList(); // Сначала загружаем в память
+
+            // Сортируем в памяти
+            return appointments
                 .OrderByDescending(z => z.дата_записи)
                 .ThenBy(z => z.время_записи)
-                .AsNoTracking()
                 .ToList();
         }
 
@@ -153,7 +164,12 @@ namespace WpfApp4.Models.Entities
                 query = query.Where(z => z.врач_id == doctorId.Value);
             }
 
-            return query.OrderBy(z => z.время_записи).AsNoTracking().ToList();
+            var appointments = query.ToList(); // Сначала загружаем в память
+
+            // Сортируем в памяти
+            return appointments
+                .OrderBy(z => z.время_записи)
+                .ToList();
         }
 
         public bool IsTimeAvailable(int doctorId, DateTime date, TimeSpan time)

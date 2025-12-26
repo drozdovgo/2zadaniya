@@ -118,9 +118,10 @@ namespace WpfApp4.ViewModels
             BackCommand = new MyCommand(_ => BackRequested?.Invoke());
             RefreshCommand = new MyCommand(_ => LoadData());
 
+            // Отложенная загрузка данных после инициализации
             LoadData();
-
         }
+
 
         private void LoadCurrentDoctor()
         {
@@ -156,14 +157,19 @@ namespace WpfApp4.ViewModels
             {
                 if (_currentDoctor != null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"=== Загрузка данных врача ID={_currentDoctor.id} ===");
+
                     var appointments = _appointmentRepository.GetDoctorAppointments(_currentDoctor.id);
                     Appointments = new ObservableCollection<Запись>(appointments);
+                    System.Diagnostics.Debug.WriteLine($"✅ Загружено {appointments.Count} записей для врача {_currentDoctor.id}");
 
                     var schedules = _scheduleRepository.GetDoctorSchedule(_currentDoctor.id);
                     Schedules = new ObservableCollection<Расписание>(schedules);
-
-                    System.Diagnostics.Debug.WriteLine($"✅ Загружено {appointments.Count} записей для врача {_currentDoctor.id}");
                     System.Diagnostics.Debug.WriteLine($"✅ Загружено {schedules.Count} расписаний для врача {_currentDoctor.id}");
+
+                    // Принудительно обновляем UI
+                    OnPropertyChanged(nameof(Appointments));
+                    OnPropertyChanged(nameof(Schedules));
                 }
                 else
                 {
@@ -175,10 +181,13 @@ namespace WpfApp4.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Ошибка загрузки данных: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 Appointments = new ObservableCollection<Запись>();
                 Schedules = new ObservableCollection<Расписание>();
             }
         }
+
+
 
 
         private void LoadAppointmentsForDate()

@@ -21,12 +21,13 @@ namespace WpfApp4.Models.Entities
         public IEnumerable<Расписание> GetAll()
         {
             using var context = new MyDatabaseContext(_connectionString);
-            return context.Расписание
+            var schedules = context.Расписание
                 .Include(r => r.Врач)
                 .ThenInclude(d => d.Пользователь)
                 .Include(r => r.Врач.Специализация)
-                .AsNoTracking()
-                .ToList();
+                .ToList(); // Сначала загружаем в память
+
+            return schedules;
         }
 
         public Расписание? Get(int id)
@@ -77,13 +78,16 @@ namespace WpfApp4.Models.Entities
         public List<Расписание> GetDoctorSchedule(int doctorId)
         {
             using var context = new MyDatabaseContext(_connectionString);
-            return context.Расписание
+            var schedules = context.Расписание
                 .Include(r => r.Врач)
                 .ThenInclude(d => d.Пользователь)
                 .Where(r => r.врач_id == doctorId && r.активен)
+                .ToList(); // Сначала загружаем в память
+
+            // Сортируем в памяти
+            return schedules
                 .OrderBy(r => r.день_недели)
                 .ThenBy(r => r.время_начала)
-                .AsNoTracking()
                 .ToList();
         }
     }

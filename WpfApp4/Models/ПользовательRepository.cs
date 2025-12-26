@@ -21,16 +21,20 @@ namespace WpfApp4.Models.Entities
         public IEnumerable<Запись> GetAll()
         {
             using var context = new MyDatabaseContext(_connectionString);
-            return context.Запись
+            var appointments = context.Запись
                 .Include(z => z.Пациент)
                 .Include(z => z.Врач)
                 .ThenInclude(d => d.Пользователь)
                 .Include(z => z.Врач.Специализация)
-                .AsNoTracking()
+                .ToList(); // Сначала загружаем в память
+
+            // Сортируем в памяти
+            return appointments
+                .OrderByDescending(z => z.дата_записи)
+                .ThenBy(z => z.время_записи)
                 .ToList();
         }
 
-        // ... остальные методы без lock и debug
         public Запись? Get(int id)
         {
             using var context = new MyDatabaseContext(_connectionString);

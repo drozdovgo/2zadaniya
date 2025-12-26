@@ -221,22 +221,31 @@ namespace WpfApp4.ViewModels
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("=== Загрузка данных администратора ===");
+
                 var appointments = _appointmentRepository.GetAll().ToList();
                 Appointments = new ObservableCollection<Запись>(appointments);
+                System.Diagnostics.Debug.WriteLine($"Записей в системе: {appointments.Count}");
 
                 var schedules = _scheduleRepository.GetAll().ToList();
                 Schedules = new ObservableCollection<Расписание>(schedules);
+                System.Diagnostics.Debug.WriteLine($"Расписаний в системе: {schedules.Count}");
 
                 LoadDoctors();
                 LoadPatients();
+
+                // Принудительно обновляем UI
+                OnPropertyChanged(nameof(Appointments));
+                OnPropertyChanged(nameof(Schedules));
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки данных: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка загрузки данных: {ex.Message}");
                 Appointments = new ObservableCollection<Запись>();
                 Schedules = new ObservableCollection<Расписание>();
             }
         }
+
 
         private void LoadAppointmentsForDate()
         {
